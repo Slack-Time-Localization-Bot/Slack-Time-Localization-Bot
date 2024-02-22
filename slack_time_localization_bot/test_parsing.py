@@ -65,6 +65,7 @@ TEST_TEXT_TO_TIMES = [
     ("Lass uns morgen um 11 oder 13 Uhr treffen.", [tomorrow(11), tomorrow(13)]),
     ("Lasst uns heute um 11 treffen.", [today(11)]),
     ("Lasst uns morgen um 11:00 EST treffen.", [tomorrow(11, tzinfo=ZoneInfo("EST"))]),
+    ("from the one",  [])
 ]
 
 

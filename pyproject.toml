@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "slack-time-localization-bot"
-version = "0.1.1-dev0"
+version = "0.1.1"
 description = "Detect temporal expressions in Slack messages (\"tomorrow at 5 pm\") and translate them for readers in other timezones."
 authors = ["Philipp Hossner <philipp.hossner@posteo.de>"]
 readme = "README.md"

@@ -26,14 +26,9 @@ app = App(token=SLACK_BOT_TOKEN)
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=600))
-def get_active_users() -> Dict:
+def get_user(user_id: str) -> Dict:
     client: WebClient = app.client
-    members = client.users_list().data["members"]
-    return {
-        member["id"]: member
-        for member in members
-        if not member["is_bot"] and not member["deleted"]
-    }
+    return client.users_info(user=user_id).data["user"]
 
 
 def text_to_temporal_expressions_for_timezone(
@@ -62,10 +57,9 @@ def process_message(client: WebClient, message):
     poster_id = message["user"]
     text = sanitize_message_text(message["text"])
 
-    all_users = get_active_users()
-    if poster_id not in all_users:
+    poster = get_user(poster_id)
+    if not poster:
         return
-    poster = all_users[poster_id]
     poster_timezone = ZoneInfo(poster["tz"])
     temporal_expressions = text_to_temporal_expressions_for_timezone(
         text, poster_timezone
@@ -77,8 +71,8 @@ def process_message(client: WebClient, message):
         ]
 
         for channel_member in channel_members:
-            if channel_member in all_users:
-                member_user = all_users[channel_member]
+            member_user = get_user(channel_member)
+            if member_user and not member_user["is_bot"]:
                 member_id = member_user["id"]
                 member_timezone = ZoneInfo(member_user["tz"])
                 temporal_expressions_with_different_tz = list(

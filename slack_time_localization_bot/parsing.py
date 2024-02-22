@@ -67,5 +67,5 @@ def text_to_temporal_expressions(
             timezone=detect_timezone(x["body"]) or reference_time.tzinfo,
         )
         for x in result
-        if x is not None
+        if x is not None and x["value"]["type"] == "value"
     ]

@@ -2,6 +2,22 @@
 
 Detect temporal expressions in Slack messages (_tomorrow at 5 pm_) and translate them for readers in other timezones.
 
+# Who is this for?
+
+Many organizations have people around the globe communicating via Slack. 
+That usually means a lot of different timezones.
+So when people try to coordinate their activities a lot of time conversions have to happen when reading messages.
+If you read `"How about tomorrow at 5 pm?"` you might need to do the following:
+
+1. Check the author's timezone.
+2. Check you own timezone (you usually know that already).
+3. Convert `"tomorrow at 5 pm"` into your timezone.
+
+This is cumbersome and prone to errors. Especially when dealing with summer/winter time.
+This bot aims to help people with that.
+
+The bot can easily be self-hosted and does not need to be reachable from the internet due to Slack's [socket mode](https://api.slack.com/apis/connections/socket).
+
 ## How It Works
 
 Currently, the implementation is centered around Meta's [Duckling library](https://github.com/facebook/duckling). 

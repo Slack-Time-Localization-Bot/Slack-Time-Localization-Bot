@@ -4,8 +4,10 @@ Detect temporal expressions in Slack messages (_tomorrow at 5 pm_) and translate
 
 ## How It Works
 
-Currently the implementation is centered around Meta's [Duckling library](https://github.com/facebook/duckling). 
+Currently, the implementation is centered around Meta's [Duckling library](https://github.com/facebook/duckling). 
 It can detect temporal expressions in [various languages](https://github.com/facebook/duckling/tree/main/Duckling/Dimensions) and extract a timestamp from it.
+Since Duckling needs to know the language of the text in advance the library [lingua-py](https://github.com/pemistahl/lingua-py) is used to detect the language.
+Big kudos to the authors of these libraries. Without them this bot could not have been developed in a feasible amount of time.
 
 The Slack bot reads every message it has access to and uses Duckling to extract timestamps. 
 For every possible reader of the message the bot then compares the timezone of the message author and the reader and translates the timestamp to the reader's timezone.

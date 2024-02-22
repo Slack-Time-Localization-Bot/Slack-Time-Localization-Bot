@@ -67,7 +67,6 @@ oauth_config:
 settings:
   event_subscriptions:
     bot_events:
-      - app_home_opened
       - app_mention
       - channel_history_changed
       - group_history_changed

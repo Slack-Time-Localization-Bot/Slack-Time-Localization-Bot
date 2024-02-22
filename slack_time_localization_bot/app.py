@@ -104,5 +104,9 @@ def process_message(client: WebClient, message):
                     )
 
 
-if __name__ == "__main__":
+def run():
     SocketModeHandler(app, SLACK_APP_TOKEN).start()
+
+
+if __name__ == "__main__":
+    run()

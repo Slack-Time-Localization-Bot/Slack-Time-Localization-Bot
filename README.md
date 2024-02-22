@@ -2,6 +2,16 @@
 
 Detect temporal expressions in Slack messages (_tomorrow at 5 pm_) and translate them for readers in other timezones.
 
+## How It Works
+
+Currently the implementation is centered around Meta's [Duckling library](https://github.com/facebook/duckling). 
+It can detect temporal expressions in [various languages](https://github.com/facebook/duckling/tree/main/Duckling/Dimensions) and extract a timestamp from it.
+
+The Slack bot reads every message it has access to and uses Duckling to extract timestamps. 
+For every possible reader of the message the bot then compares the timezone of the message author and the reader and translates the timestamp to the reader's timezone.
+Finally, the bot will post an ephemeral message below the message with the detected temporal expressions and the timestamps translated to the local timezone.
+That ephemeral message might look different for readers if they are not in the same timezone.
+
 ## Quickstart
 
 [Create a Slack app](https://api.slack.com/start/quickstart) with the following manifest:

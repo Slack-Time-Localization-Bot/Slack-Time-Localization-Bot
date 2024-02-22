@@ -12,6 +12,7 @@ from slack_time_localization_bot.config import (
     TIME_FORMAT,
     SLACK_APP_TOKEN,
     SLACK_BOT_TOKEN,
+    LOG_LEVEL,
 )
 from slack_time_localization_bot.parsing import (
     text_to_temporal_expressions,
@@ -19,7 +20,7 @@ from slack_time_localization_bot.parsing import (
 )
 from slack_time_localization_bot.utils import sanitize_message_text
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 app = App(token=SLACK_BOT_TOKEN)
 

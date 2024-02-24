@@ -95,6 +95,8 @@ Finally you can run it with
 ```shell
 export SLACK_BOT_TOKEN=xoxb-...
 export SLACK_APP_TOKEN=xapp-...
+export USER_CACHE_SIZE=500 # number of user profiles to cache in memory
+export USER_CACHE_TTL=600 # number of seconds a user profile will be cached in memory
 slack-time-localization-bot
 ```
 

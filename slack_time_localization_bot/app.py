@@ -12,7 +12,7 @@ from slack_time_localization_bot.config import (
     TIME_FORMAT,
     SLACK_APP_TOKEN,
     SLACK_BOT_TOKEN,
-    LOG_LEVEL,
+    LOG_LEVEL, USER_CACHE_SIZE, USER_CACHE_TTL,
 )
 from slack_time_localization_bot.parsing import (
     text_to_temporal_expressions,
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 app = App(token=SLACK_BOT_TOKEN)
 
 
-@cached(cache=TTLCache(maxsize=1024, ttl=600))
+@cached(cache=TTLCache(maxsize=USER_CACHE_SIZE, ttl=USER_CACHE_TTL))
 def get_user(user_id: str) -> Dict:
     client: WebClient = app.client
     return client.users_info(user=user_id).data["user"]

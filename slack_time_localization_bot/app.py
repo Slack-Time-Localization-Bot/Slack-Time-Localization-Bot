@@ -28,7 +28,6 @@ class SlackTimeLocalizationBot:
     ):
         self.app = app
         self.slack_app_token = slack_app_token
-        logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
         self.app.message()(  # register process_message as handler for every incoming message
             self.process_message
@@ -121,6 +120,7 @@ def run(
     user_cache_ttl: int = 600,
     log_level: int | str = logging.INFO,
 ):
+    logging.basicConfig(level=log_level)
     app = App(token=slack_bot_token)
     bot = SlackTimeLocalizationBot(
         app=app,

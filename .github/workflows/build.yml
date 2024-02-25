@@ -28,6 +28,8 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
       - name: Run the automated tests
-        run: poetry run pytest ./slack_time_localization_bot
+        run: poetry run coverage run --source=slack_time_localization_bot -m pytest
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
       - name: Build artifacts
         run: poetry build

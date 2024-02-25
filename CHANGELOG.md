@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.1.4](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.4) (2024-02-25)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.3...v0.1.4)
+
+**Merged pull requests:**
+
+- Fix --debug flag not working introduced by previous PR [\#10](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/10) ([phihos](https://github.com/phihos))
+- Add tests for message handling [\#9](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/9) ([phihos](https://github.com/phihos))
+- Add test coverage to CI [\#8](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/8) ([phihos](https://github.com/phihos))
+- Send ephemeral message response into thread if message came from thread [\#7](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/7) ([phihos](https://github.com/phihos))
+- Add new env var parameters USER\_CACHE\_SIZE and USER\_CACHE\_TTL [\#6](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/6) ([phihos](https://github.com/phihos))
+
+## [v0.1.3](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.3) (2024-02-22)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.2...v0.1.3)
+
+**Merged pull requests:**
+
+- Only accept duckling responses of type "value" [\#5](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/5) ([phihos](https://github.com/phihos))
+
 ## [v0.1.2](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.2) (2024-02-22)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.1...v0.1.2)

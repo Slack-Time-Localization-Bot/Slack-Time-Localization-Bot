@@ -12,7 +12,9 @@ from slack_time_localization_bot.config import (
     TIME_FORMAT,
     SLACK_APP_TOKEN,
     SLACK_BOT_TOKEN,
-    LOG_LEVEL, USER_CACHE_SIZE, USER_CACHE_TTL,
+    LOG_LEVEL,
+    USER_CACHE_SIZE,
+    USER_CACHE_TTL,
 )
 from slack_time_localization_bot.parsing import (
     text_to_temporal_expressions,
@@ -54,6 +56,7 @@ def time_comparison_to_text(
 @app.message()
 def process_message(client: WebClient, message):
     channel_id = message["channel"]
+    thread_id = message.get("thread_ts", None)
     poster_id = message["user"]
     text = sanitize_message_text(message["text"])
 
@@ -96,6 +99,7 @@ def process_message(client: WebClient, message):
                         channel=channel_id,
                         user=member_id,
                         text=ephemeral_message,
+                        thread_ts=thread_id,
                     )
 
 

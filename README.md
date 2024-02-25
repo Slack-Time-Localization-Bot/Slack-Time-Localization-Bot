@@ -1,5 +1,7 @@
 # Slack Time Localization Bot
 
+[![codecov](https://codecov.io/gh/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/graph/badge.svg?token=RHMXGIH8Z9)](https://codecov.io/gh/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot)
+
 Detect temporal expressions in Slack messages (_tomorrow at 5 pm_) and translate them for readers in other timezones.
 
 # Who is this for?

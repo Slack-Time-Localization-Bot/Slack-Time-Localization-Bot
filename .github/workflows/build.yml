@@ -1,7 +1,7 @@
 name: Build
 on:
-  push: {}
-  pull_request: {}
+  push: { }
+  pull_request: { }
 jobs:
   build-and-test:
     strategy:
@@ -28,6 +28,12 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
       - name: Run the automated tests
-        run: poetry run pytest ./slack_time_localization_bot
+        run: |
+          poetry run pytest --cov=./ --cov-report=term --cov-report=xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Slack-Time-Localization-Bot/Slack-Time-Localization-Bot
       - name: Build artifacts
         run: poetry build

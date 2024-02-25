@@ -3,7 +3,7 @@ from typing import Annotated
 
 import typer
 
-import slack_time_localization_bot.app as app
+from slack_time_localization_bot import app
 
 
 def main(

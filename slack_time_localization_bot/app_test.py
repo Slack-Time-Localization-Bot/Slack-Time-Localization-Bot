@@ -1,5 +1,9 @@
+import logging
 from unittest.mock import call
 
+import slack_bolt
+
+import slack_time_localization_bot
 from slack_time_localization_bot.app import SlackTimeLocalizationBot
 
 
@@ -79,3 +83,38 @@ def test_slack_bot_message_with_temporal_expressions(mocker):
     client_mock.users_info.assert_has_calls(
         [call(user=message["user"]), call(user="some-other-user")]
     )
+
+
+def test_run(monkeypatch, mocker):
+    mock_bot_instance = mocker.MagicMock()
+    mock_bot_instance.start = mocker.MagicMock()
+    mock_bot_cls = mocker.MagicMock(return_value=mock_bot_instance)
+    monkeypatch.setattr(
+        slack_time_localization_bot.app, "SlackTimeLocalizationBot", mock_bot_cls
+    )
+    slack_app_mock_instance = mocker.MagicMock()
+    slack_app_mock_cls = mocker.MagicMock(return_value=slack_app_mock_instance)
+    #monkeypatch.setattr(slack_bolt.app.app, "App", slack_app_mock_cls)
+    #monkeypatch.setattr(slack_bolt.app, "App", slack_app_mock_cls)
+    #monkeypatch.setattr(slack_bolt, "App", slack_app_mock_cls)
+    monkeypatch.setattr(slack_time_localization_bot.app, "App", slack_app_mock_cls)
+
+    slack_time_localization_bot.app.run(
+        slack_bot_token="some-token",
+        slack_app_token="some-token",
+        user_cache_size=100,
+        user_cache_ttl=300,
+        log_level=logging.DEBUG,
+    )
+
+    slack_app_mock_cls.assert_called_once_with(
+        token="some-token",
+    )
+    mock_bot_cls.assert_called_once_with(
+        app=slack_app_mock_instance,
+        slack_app_token="some-token",
+        user_cache_size=100,
+        user_cache_ttl=300,
+        log_level=logging.DEBUG,
+    )
+    mock_bot_instance.start.assert_called_once()

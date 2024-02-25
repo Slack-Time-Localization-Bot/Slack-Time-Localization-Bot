@@ -12,7 +12,7 @@ So when people try to coordinate their activities a lot of time conversions have
 If you read `"How about tomorrow at 5 pm?"` you might need to do the following:
 
 1. Check the author's timezone.
-2. Check you own timezone (you usually know that already).
+2. Check your own timezone (you usually know that already).
 3. Convert `"tomorrow at 5 pm"` into your timezone.
 
 This is cumbersome and prone to errors. Especially when dealing with summer/winter time.
@@ -99,6 +99,7 @@ export SLACK_BOT_TOKEN=xoxb-...
 export SLACK_APP_TOKEN=xapp-...
 export USER_CACHE_SIZE=500 # number of user profiles to cache in memory
 export USER_CACHE_TTL=600 # number of seconds a user profile will be cached in memory
+export DEBUG=false # set to true to enable verbose logging including message contents
 slack-time-localization-bot
 ```
 

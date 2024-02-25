@@ -1,5 +1,7 @@
 # Slack Time Localization Bot
 
+[![Coverage Status](https://coveralls.io/repos/github/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/badge.svg?branch=main)](https://coveralls.io/github/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot?branch=main)
+
 Detect temporal expressions in Slack messages (_tomorrow at 5 pm_) and translate them for readers in other timezones.
 
 # Who is this for?

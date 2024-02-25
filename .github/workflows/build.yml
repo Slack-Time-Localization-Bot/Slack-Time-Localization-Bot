@@ -1,7 +1,7 @@
 name: Build
 on:
-  push: {}
-  pull_request: {}
+  push: { }
+  pull_request: { }
 jobs:
   build-and-test:
     strategy:
@@ -29,7 +29,21 @@ jobs:
         run: poetry install
       - name: Run the automated tests
         run: poetry run coverage run --source=slack_time_localization_bot -m pytest
-      - name: Coveralls
+      - name: Display coverage
+        run: poetry run coverage report
+      - name: Coveralls Parallel
         uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
       - name: Build artifacts
         run: poetry build
+  report:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true

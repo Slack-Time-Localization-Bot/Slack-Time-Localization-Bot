@@ -94,9 +94,6 @@ def test_run(monkeypatch, mocker):
     )
     slack_app_mock_instance = mocker.MagicMock()
     slack_app_mock_cls = mocker.MagicMock(return_value=slack_app_mock_instance)
-    #monkeypatch.setattr(slack_bolt.app.app, "App", slack_app_mock_cls)
-    #monkeypatch.setattr(slack_bolt.app, "App", slack_app_mock_cls)
-    #monkeypatch.setattr(slack_bolt, "App", slack_app_mock_cls)
     monkeypatch.setattr(slack_time_localization_bot.app, "App", slack_app_mock_cls)
 
     slack_time_localization_bot.app.run(

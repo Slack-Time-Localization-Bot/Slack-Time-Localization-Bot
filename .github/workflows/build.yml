@@ -28,22 +28,12 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
       - name: Run the automated tests
-        run: poetry run coverage run --source=slack_time_localization_bot -m pytest
-      - name: Display coverage
-        run: poetry run coverage report
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@v2
+        run: |
+          poetry run pytest --cov=./ --cov-report=xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
         with:
-          flag-name: run-${{ join(matrix.*, '-') }}
-          parallel: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Slack-Time-Localization-Bot/Slack-Time-Localization-Bot
       - name: Build artifacts
         run: poetry build
-  report:
-    needs: build-and-test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true

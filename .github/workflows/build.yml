@@ -39,7 +39,7 @@ jobs:
       - name: Build artifacts
         run: poetry build
   report:
-    needs: test
+    needs: build-and-test
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:

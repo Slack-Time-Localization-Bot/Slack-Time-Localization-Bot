@@ -3,7 +3,7 @@ from typing import Annotated
 
 import typer
 
-import slack_time_localization_bot.config as config
+import slack_time_localization_bot.app as app
 
 
 def main(
@@ -16,16 +16,15 @@ def main(
     """Detect temporal expressions in Slack messages ("tomorrow at 5 pm") and translate them for readers in other
     timezones."""
 
-    if debug:
-        config.LOG_LEVEL = logging.DEBUG
-    config.SLACK_APP_TOKEN = slack_app_token
-    config.SLACK_BOT_TOKEN = slack_bot_token
-    config.USER_CACHE_SIZE = user_cache_size
-    config.USER_CACHE_TTL = user_cache_ttl
-    # app needs to be imported after SLACK_APP_TOKEN is set or else this app will crash
-    import slack_time_localization_bot.app as app
+    log_level = logging.DEBUG if debug else logging.INFO
 
-    app.run()
+    app.run(
+        slack_app_token=slack_app_token,
+        slack_bot_token=slack_bot_token,
+        user_cache_size=user_cache_size,
+        user_cache_ttl=user_cache_ttl,
+        log_level=log_level,
+    )
 
 
 def run():

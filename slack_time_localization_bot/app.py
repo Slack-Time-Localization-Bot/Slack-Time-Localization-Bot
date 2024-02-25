@@ -1,111 +1,132 @@
 import datetime
 import logging
+import operator
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 
-from cachetools import cached, TTLCache
+from cachetools import TTLCache, cachedmethod
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 
-from slack_time_localization_bot.config import (
-    TIME_FORMAT,
-    SLACK_APP_TOKEN,
-    SLACK_BOT_TOKEN,
-    LOG_LEVEL,
-    USER_CACHE_SIZE,
-    USER_CACHE_TTL,
-)
 from slack_time_localization_bot.parsing import (
     text_to_temporal_expressions,
     TemporalExpression,
 )
 from slack_time_localization_bot.utils import sanitize_message_text
 
-logging.basicConfig(level=LOG_LEVEL)
-logger = logging.getLogger(__name__)
-app = App(token=SLACK_BOT_TOKEN)
 
+class SlackTimeLocalizationBot:
+    def __init__(
+        self,
+        app: App,
+        slack_app_token: str,
+        user_cache_size: int = 500,
+        user_cache_ttl: int = 600,
+        log_level: int | str = logging.INFO,
+        time_format: str = "%H:%M",
+    ):
+        self.app = app
+        self.slack_app_token = slack_app_token
+        logging.basicConfig(level=log_level)
+        self.logger = logging.getLogger(__name__)
+        self.app.message()(  # register process_message as handler for every incoming message
+            self.process_message
+        )
+        self.user_cache = TTLCache(maxsize=user_cache_size, ttl=user_cache_ttl)
+        self.time_format = time_format
 
-@cached(cache=TTLCache(maxsize=USER_CACHE_SIZE, ttl=USER_CACHE_TTL))
-def get_user(user_id: str) -> Dict:
-    client: WebClient = app.client
-    return client.users_info(user=user_id).data["user"]
+    def start(self, socket_mode_handler_cls: type[SocketModeHandler]):
+        socket_mode_handler_cls(self.app, self.slack_app_token).start()
 
+    @cachedmethod(operator.attrgetter("user_cache"))
+    def get_user(self, user_id: str) -> Dict:
+        return self.app.client.users_info(user=user_id).data["user"]
 
-def text_to_temporal_expressions_for_timezone(
-    text: str, timezone: ZoneInfo
-) -> List[TemporalExpression]:
-    reference_time = datetime.datetime.now(tz=timezone)
-    return text_to_temporal_expressions(text, reference_time)
+    @staticmethod
+    def text_to_temporal_expressions_for_timezone(
+        text: str, timezone: ZoneInfo
+    ) -> List[TemporalExpression]:
+        reference_time = datetime.datetime.now(tz=timezone)
+        return text_to_temporal_expressions(text, reference_time)
 
+    def time_comparison_to_text(
+        self,
+        temporal_expression: TemporalExpression,
+        user_timezone: datetime.tzinfo,
+    ) -> str:
+        return (
+            f"> {temporal_expression.text}\n"
+            f"_{temporal_expression.datetime.astimezone(temporal_expression.timezone).strftime(self.time_format)} "
+            f"({temporal_expression.timezone})_ ➔ "
+            f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(self.time_format)} ({user_timezone})_ "
+            f"or _{temporal_expression.datetime.astimezone(ZoneInfo('UTC')).strftime(self.time_format)} (UTC)_"
+        )
 
-def time_comparison_to_text(
-    temporal_expression: TemporalExpression,
-    user_timezone: datetime.tzinfo,
-) -> str:
-    return (
-        f"> {temporal_expression.text}\n"
-        f"_{temporal_expression.datetime.astimezone(temporal_expression.timezone).strftime(TIME_FORMAT)} "
-        f"({temporal_expression.timezone})_ ➔ "
-        f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(TIME_FORMAT)} ({user_timezone})_ "
-        f"or _{temporal_expression.datetime.astimezone(ZoneInfo('UTC')).strftime(TIME_FORMAT)} (UTC)_"
-    )
+    def process_message(self, client: WebClient, message):
+        channel_id = message["channel"]
+        thread_id = message.get("thread_ts", None)
+        poster_id = message["user"]
+        text = sanitize_message_text(message["text"])
 
+        poster = self.get_user(poster_id)
+        if not poster:
+            return
+        poster_timezone = ZoneInfo(poster["tz"])
+        temporal_expressions = self.text_to_temporal_expressions_for_timezone(
+            text, poster_timezone
+        )
 
-@app.message()
-def process_message(client: WebClient, message):
-    channel_id = message["channel"]
-    thread_id = message.get("thread_ts", None)
-    poster_id = message["user"]
-    text = sanitize_message_text(message["text"])
+        if temporal_expressions:
+            channel_members = client.conversations_members(channel=channel_id).data[
+                "members"
+            ]
 
-    poster = get_user(poster_id)
-    if not poster:
-        return
-    poster_timezone = ZoneInfo(poster["tz"])
-    temporal_expressions = text_to_temporal_expressions_for_timezone(
-        text, poster_timezone
-    )
-
-    if temporal_expressions:
-        channel_members = client.conversations_members(channel=channel_id).data[
-            "members"
-        ]
-
-        for channel_member in channel_members:
-            member_user = get_user(channel_member)
-            if member_user and not member_user["is_bot"]:
-                member_id = member_user["id"]
-                member_timezone = ZoneInfo(member_user["tz"])
-                temporal_expressions_with_different_tz = list(
-                    filter(
-                        lambda x: x.timezone != member_timezone,
-                        temporal_expressions,
-                    )
-                )
-                if temporal_expressions_with_different_tz:
-                    ephemeral_message_lines = list(
-                        map(
-                            lambda x: time_comparison_to_text(x, member_timezone),
-                            temporal_expressions_with_different_tz,
+            for channel_member in channel_members:
+                member_user = self.get_user(channel_member)
+                if member_user and not member_user["is_bot"]:
+                    member_id = member_user["id"]
+                    member_timezone = ZoneInfo(member_user["tz"])
+                    temporal_expressions_with_different_tz = list(
+                        filter(
+                            lambda x: x.timezone != member_timezone,
+                            temporal_expressions,
                         )
                     )
-                    ephemeral_message = "\n".join(ephemeral_message_lines)
-                    logger.debug(
-                        f'Sending ephemeral message to {member_user["name"]}: {ephemeral_message}'
-                    )
-                    client.chat_postEphemeral(
-                        channel=channel_id,
-                        user=member_id,
-                        text=ephemeral_message,
-                        thread_ts=thread_id,
-                    )
+                    if temporal_expressions_with_different_tz:
+                        ephemeral_message_lines = list(
+                            map(
+                                lambda x: self.time_comparison_to_text(
+                                    x, member_timezone
+                                ),
+                                temporal_expressions_with_different_tz,
+                            )
+                        )
+                        ephemeral_message = "\n".join(ephemeral_message_lines)
+                        self.logger.debug(
+                            f'Sending ephemeral message to {member_user["name"]}: {ephemeral_message}'
+                        )
+                        client.chat_postEphemeral(
+                            channel=channel_id,
+                            user=member_id,
+                            text=ephemeral_message,
+                            thread_ts=thread_id,
+                        )
 
 
-def run():
-    SocketModeHandler(app, SLACK_APP_TOKEN).start()
-
-
-if __name__ == "__main__":
-    run()
+def run(
+    slack_bot_token: str,
+    slack_app_token: str,
+    user_cache_size: int = 500,
+    user_cache_ttl: int = 600,
+    log_level: int | str = logging.INFO,
+):
+    app = App(token=slack_bot_token)
+    bot = SlackTimeLocalizationBot(
+        app=app,
+        slack_app_token=slack_app_token,
+        user_cache_size=user_cache_size,
+        user_cache_ttl=user_cache_ttl,
+        log_level=log_level,
+    )
+    bot.start(SocketModeHandler)

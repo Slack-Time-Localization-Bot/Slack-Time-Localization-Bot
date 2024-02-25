@@ -40,7 +40,7 @@ jobs:
         run: poetry build
   report:
     needs: build-and-test
-    if: ${{ always() }}
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished

@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.1.5](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.5) (2024-02-28)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.4...v0.1.5)
+
+**Merged pull requests:**
+
+- Evaluate time intervals with beginning and end [\#14](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/14) ([phihos](https://github.com/phihos))
+- Bump cachetools from 5.3.2 to 5.3.3 [\#13](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/13) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump black from 23.12.1 to 24.2.0 [\#12](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/12) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 8.0.1 to 8.0.2 [\#11](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/11) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.1.4](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.4) (2024-02-25)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.3...v0.1.4)

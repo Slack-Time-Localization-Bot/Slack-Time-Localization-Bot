@@ -93,6 +93,8 @@ def text_to_temporal_expressions(
                 # correct interval end datetime
                 if result["value"]["to"]["grain"] == "minute":
                     to_datetime = to_datetime - datetime.timedelta(minutes=1)
+                elif result["value"]["to"]["grain"] == "hour":
+                    to_datetime = to_datetime - datetime.timedelta(hours=1)
                 return_value.append(
                     TemporalExpression(
                         text=result["body"],

@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.1.6](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.6) (2024-02-28)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.5...v0.1.6)
+
+**Merged pull requests:**
+
+- Interpret time expressions in 24-hour format by default [\#15](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/15) ([phihos](https://github.com/phihos))
+
 ## [v0.1.5](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.5) (2024-02-28)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.4...v0.1.5)

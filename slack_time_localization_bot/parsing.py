@@ -18,7 +18,11 @@ from duckling import (
 )
 from lingua import LanguageDetectorBuilder
 
-detector = LanguageDetectorBuilder.from_all_languages().build()
+detector = (
+    LanguageDetectorBuilder.from_all_spoken_languages()
+    .with_preloaded_language_models()
+    .build()
+)
 time_zones = load_time_zones("/usr/share/zoneinfo")
 
 # initializations that should be done once on module load
@@ -34,9 +38,10 @@ class TemporalExpression:
 
 
 def detect_language(text: str) -> Optional[str]:
-    language = detector.detect_language_of(text)
-    if language:
-        return language.iso_code_639_1.name
+    if len(text) >= 5:
+        language = detector.detect_language_of(text)
+        if language:
+            return language.iso_code_639_1.name
     return "EN"
 
 
@@ -86,7 +91,8 @@ def text_to_temporal_expressions(
                     TemporalExpression(
                         text=result["body"],
                         datetime=isoparse(result["value"]["from"]["value"]),
-                        timezone=detect_timezone(result["body"]) or reference_time.tzinfo,
+                        timezone=detect_timezone(result["body"])
+                        or reference_time.tzinfo,
                     )
                 )
                 to_datetime = isoparse(result["value"]["to"]["value"])
@@ -99,7 +105,8 @@ def text_to_temporal_expressions(
                     TemporalExpression(
                         text=result["body"],
                         datetime=to_datetime,
-                        timezone=detect_timezone(result["body"]) or reference_time.tzinfo,
+                        timezone=detect_timezone(result["body"])
+                        or reference_time.tzinfo,
                     )
                 )
     return return_value

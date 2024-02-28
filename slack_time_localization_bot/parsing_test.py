@@ -13,6 +13,7 @@ from slack_time_localization_bot.parsing import (
 TEST_DETECT = [
     ("Let us meet at 11 am or 1 pm.", "EN"),
     ("Lass uns um 11 oder 13 Uhr treffen.", "DE"),
+    ("F", "EN")
 ]
 
 
@@ -65,12 +66,20 @@ TEST_TEXT_TO_TIMES = [
     ("Lass uns morgen um 11 oder 13 Uhr treffen.", [tomorrow(11), tomorrow(13)]),
     ("Lasst uns heute um 11 treffen.", [today(11)]),
     ("Lasst uns morgen um 11:00 EST treffen.", [tomorrow(11, tzinfo=ZoneInfo("EST"))]),
+    # intervals
     ("from the one", []),
     (
         "starting between at 05:00 and 07:12 UTC",
         [
             today(17, 00, tzinfo=ZoneInfo("UTC")),
             today(19, 12, tzinfo=ZoneInfo("UTC")),
+        ],
+    ),
+    (
+        "starting between at 5 and 7",
+        [
+            today(17, 00),
+            today(19, 00),
         ],
     ),
 ]

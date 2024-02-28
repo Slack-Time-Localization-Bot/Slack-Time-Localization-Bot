@@ -12,6 +12,7 @@ def test_cli(monkeypatch, mocker):
         "slack_bot_token": "some_bot_token",
         "user_cache_size": 100,
         "user_cache_ttl": 300,
+        "prefer_24h_interpretation": False,
         "debug": True,
     }
 
@@ -22,5 +23,6 @@ def test_cli(monkeypatch, mocker):
         slack_bot_token=cli_kwargs["slack_bot_token"],
         user_cache_size=cli_kwargs["user_cache_size"],
         user_cache_ttl=cli_kwargs["user_cache_ttl"],
+        prefer_24h_interpretation=cli_kwargs["prefer_24h_interpretation"],
         log_level=logging.DEBUG,
     )

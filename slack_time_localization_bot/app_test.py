@@ -101,6 +101,7 @@ def test_run(monkeypatch, mocker):
         slack_app_token="some-token",
         user_cache_size=100,
         user_cache_ttl=300,
+        prefer_24h_interpretation=False,
         log_level=logging.DEBUG,
     )
 
@@ -112,6 +113,6 @@ def test_run(monkeypatch, mocker):
         slack_app_token="some-token",
         user_cache_size=100,
         user_cache_ttl=300,
-        log_level=logging.DEBUG,
+        prefer_24h_interpretation=False,
     )
     mock_bot_instance.start.assert_called_once()

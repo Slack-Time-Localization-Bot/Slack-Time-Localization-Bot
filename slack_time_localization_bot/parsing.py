@@ -18,7 +18,11 @@ from duckling import (
 )
 from lingua import LanguageDetectorBuilder
 
-detector = LanguageDetectorBuilder.from_all_languages().build()
+detector = (
+    LanguageDetectorBuilder.from_all_spoken_languages()
+    .with_preloaded_language_models()
+    .build()
+)
 time_zones = load_time_zones("/usr/share/zoneinfo")
 
 # initializations that should be done once on module load
@@ -34,9 +38,10 @@ class TemporalExpression:
 
 
 def detect_language(text: str) -> Optional[str]:
-    language = detector.detect_language_of(text)
-    if language:
-        return language.iso_code_639_1.name
+    if len(text) >= 5:
+        language = detector.detect_language_of(text)
+        if language:
+            return language.iso_code_639_1.name
     return "EN"
 
 
@@ -58,14 +63,50 @@ def text_to_temporal_expressions(
     )
     context = Context(ref_time, default_locale)
     output_dims = parse_dimensions(["time"])
-    result = parse(text, context, output_dims, False)
+    duckling_result = parse(text, context, output_dims, False)
 
-    return [
-        TemporalExpression(
-            text=x["body"],
-            datetime=isoparse(x["value"]["value"]),
-            timezone=detect_timezone(x["body"]) or reference_time.tzinfo,
-        )
-        for x in result
-        if x is not None and x["value"]["type"] == "value"
-    ]
+    return_value = []
+    for result in duckling_result:
+        if result["value"]["type"] == "value":
+            # result is a single point in time
+            return_value.append(
+                TemporalExpression(
+                    text=result["body"],
+                    datetime=isoparse(result["value"]["value"]),
+                    timezone=detect_timezone(result["body"]) or reference_time.tzinfo,
+                )
+            )
+        elif (
+            result["value"]["type"] == "interval"
+            and "from" in result["value"]
+            and "to" in result["value"]
+        ):
+            interval_timezone = detect_timezone(result["body"])
+            if interval_timezone and interval_timezone != reference_time.tzinfo:
+                return_value += text_to_temporal_expressions(
+                    result["body"], reference_time.astimezone(interval_timezone)
+                )
+            else:
+                return_value.append(
+                    TemporalExpression(
+                        text=result["body"],
+                        datetime=isoparse(result["value"]["from"]["value"]),
+                        timezone=detect_timezone(result["body"])
+                        or reference_time.tzinfo,
+                    )
+                )
+                to_datetime = isoparse(result["value"]["to"]["value"])
+                # correct interval end datetime
+                if result["value"]["to"]["grain"] == "minute":
+                    to_datetime = to_datetime - datetime.timedelta(minutes=1)
+                elif result["value"]["to"]["grain"] == "hour":
+                    to_datetime = to_datetime - datetime.timedelta(hours=1)
+                return_value.append(
+                    TemporalExpression(
+                        text=result["body"],
+                        datetime=to_datetime,
+                        timezone=detect_timezone(result["body"])
+                        or reference_time.tzinfo,
+                    )
+                )
+    return return_value

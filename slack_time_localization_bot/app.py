@@ -23,7 +23,7 @@ class SlackTimeLocalizationBot:
         slack_app_token: str,
         user_cache_size: int = 500,
         user_cache_ttl: int = 600,
-        log_level: int | str = logging.INFO,
+        prefer_24h_interpretation: bool = True,
         time_format: str = "%H:%M",
     ):
         self.app = app
@@ -34,6 +34,7 @@ class SlackTimeLocalizationBot:
         )
         self.user_cache = TTLCache(maxsize=user_cache_size, ttl=user_cache_ttl)
         self.time_format = time_format
+        self.prefer_24h_interpretation = prefer_24h_interpretation
 
     def start(self, socket_mode_handler_cls: type[SocketModeHandler]):
         socket_mode_handler_cls(self.app, self.slack_app_token).start()
@@ -44,10 +45,12 @@ class SlackTimeLocalizationBot:
 
     @staticmethod
     def text_to_temporal_expressions_for_timezone(
-        text: str, timezone: ZoneInfo
+        text: str, timezone: ZoneInfo, prefer_24h_interpretation: bool
     ) -> List[TemporalExpression]:
         reference_time = datetime.datetime.now(tz=timezone)
-        return text_to_temporal_expressions(text, reference_time)
+        return text_to_temporal_expressions(
+            text, reference_time, prefer_24h_interpretation
+        )
 
     def time_comparison_to_text(
         self,
@@ -73,7 +76,7 @@ class SlackTimeLocalizationBot:
             return
         poster_timezone = ZoneInfo(poster["tz"])
         temporal_expressions = self.text_to_temporal_expressions_for_timezone(
-            text, poster_timezone
+            text, poster_timezone, self.prefer_24h_interpretation
         )
 
         if temporal_expressions:
@@ -118,6 +121,7 @@ def run(
     slack_app_token: str,
     user_cache_size: int = 500,
     user_cache_ttl: int = 600,
+    prefer_24h_interpretation: bool = True,
     log_level: int | str = logging.INFO,
 ):
     logging.basicConfig(level=log_level)
@@ -127,6 +131,6 @@ def run(
         slack_app_token=slack_app_token,
         user_cache_size=user_cache_size,
         user_cache_ttl=user_cache_ttl,
-        log_level=log_level,
+        prefer_24h_interpretation=prefer_24h_interpretation,
     )
     bot.start(SocketModeHandler)

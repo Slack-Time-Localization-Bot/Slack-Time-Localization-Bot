@@ -99,6 +99,7 @@ export SLACK_BOT_TOKEN=xoxb-...
 export SLACK_APP_TOKEN=xapp-...
 export USER_CACHE_SIZE=500 # number of user profiles to cache in memory
 export USER_CACHE_TTL=600 # number of seconds a user profile will be cached in memory
+export PREFER_24h_INTERPRETATION=true # set to true if 5:00 usually means 5 in the morning and not late afternoon
 export DEBUG=false # set to true to enable verbose logging including message contents
 slack-time-localization-bot
 ```

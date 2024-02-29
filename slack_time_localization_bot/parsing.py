@@ -96,26 +96,26 @@ def text_to_temporal_expressions(
     for result in duckling_result:
         if result["value"]["type"] == "value":
             # result is a single point in time
-            candidates = list(
-                map(lambda x: isoparse(x["value"]), result["value"]["values"])
-            )
-            chosen_datetime = (
-                select_time_values_based_on_24h_preference(candidates)
-                if prefer_24h_interpretation
-                else candidates[0]
-            )
-            return_value.append(
-                TemporalExpression(
-                    text=result["body"],
-                    datetime=chosen_datetime,
-                    timezone=detect_timezone(result["body"]) or reference_time.tzinfo,
+            candidates = [
+                isoparse(x["value"])
+                for x in result["value"]["values"]
+                if x["grain"] != "day"
+            ]
+            if candidates:
+                chosen_datetime = (
+                    select_time_values_based_on_24h_preference(candidates)
+                    if prefer_24h_interpretation
+                    else candidates[0]
                 )
-            )
-        elif (
-            result["value"]["type"] == "interval"
-            and "from" in result["value"]
-            and "to" in result["value"]
-        ):
+                return_value.append(
+                    TemporalExpression(
+                        text=result["body"],
+                        datetime=chosen_datetime,
+                        timezone=detect_timezone(result["body"])
+                        or reference_time.tzinfo,
+                    )
+                )
+        elif result["value"]["type"] == "interval":
             interval_timezone = detect_timezone(result["body"])
             if interval_timezone and interval_timezone != reference_time.tzinfo:
                 return_value += text_to_temporal_expressions(
@@ -124,48 +124,55 @@ def text_to_temporal_expressions(
                     prefer_24h_interpretation,
                 )
             else:
-                from_candidates = list(
-                    map(
-                        lambda x: isoparse(x["from"]["value"]),
-                        result["value"]["values"],
-                    )
-                )
-                chosen_from_datetime = (
-                    select_time_values_based_on_24h_preference(from_candidates)
-                    if prefer_24h_interpretation
-                    else from_candidates[0]
-                )
-                return_value.append(
-                    TemporalExpression(
-                        text=result["body"],
-                        datetime=chosen_from_datetime,
-                        timezone=detect_timezone(result["body"])
-                        or reference_time.tzinfo,
-                    )
-                )
-                to_candidates = list(
-                    map(lambda x: isoparse(x["to"]["value"]), result["value"]["values"])
-                )
-                chosen_to_datetime = (
-                    select_time_values_based_on_24h_preference(to_candidates)
-                    if prefer_24h_interpretation
-                    else to_candidates[0]
-                )
-                # correct interval end datetime
-                if result["value"]["to"]["grain"] == "minute":
-                    chosen_to_datetime = chosen_to_datetime - datetime.timedelta(
-                        minutes=1
-                    )
-                elif result["value"]["to"]["grain"] == "hour":
-                    chosen_to_datetime = chosen_to_datetime - datetime.timedelta(
-                        hours=1
-                    )
-                return_value.append(
-                    TemporalExpression(
-                        text=result["body"],
-                        datetime=chosen_to_datetime,
-                        timezone=detect_timezone(result["body"])
-                        or reference_time.tzinfo,
-                    )
-                )
+                if "from" in result["value"]:
+                    from_candidates = [
+                        isoparse(x["from"]["value"])
+                        for x in result["value"]["values"]
+                        if x["from"]["grain"] != "day"
+                    ]
+                    if from_candidates:
+                        chosen_from_datetime = (
+                            select_time_values_based_on_24h_preference(from_candidates)
+                            if prefer_24h_interpretation
+                            else from_candidates[0]
+                        )
+                        return_value.append(
+                            TemporalExpression(
+                                text=result["body"],
+                                datetime=chosen_from_datetime,
+                                timezone=detect_timezone(result["body"])
+                                or reference_time.tzinfo,
+                            )
+                        )
+                if "to" in result["value"]:
+                    to_candidates = [
+                        isoparse(x["to"]["value"])
+                        for x in result["value"]["values"]
+                        if x["to"]["grain"] != "day"
+                    ]
+                    if to_candidates:
+                        chosen_to_datetime = (
+                            select_time_values_based_on_24h_preference(to_candidates)
+                            if prefer_24h_interpretation
+                            else to_candidates[0]
+                        )
+                        # correct interval end datetime
+                        if "from" in result["value"]:
+                            # for unknown reasons the time does not need to be corrected in half-intervals
+                            if result["value"]["to"]["grain"] == "minute":
+                                chosen_to_datetime = (
+                                    chosen_to_datetime - datetime.timedelta(minutes=1)
+                                )
+                            elif result["value"]["to"]["grain"] == "hour":
+                                chosen_to_datetime = (
+                                    chosen_to_datetime - datetime.timedelta(hours=1)
+                                )
+                        return_value.append(
+                            TemporalExpression(
+                                text=result["body"],
+                                datetime=chosen_to_datetime,
+                                timezone=detect_timezone(result["body"])
+                                or reference_time.tzinfo,
+                            )
+                        )
     return return_value

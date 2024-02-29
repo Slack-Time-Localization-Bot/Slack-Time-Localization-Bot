@@ -14,7 +14,7 @@ TEST_DETECT = [
     ("Let us meet at 11 am or 1 pm.", "EN"),
     ("Lass uns um 11 oder 13 Uhr treffen.", "DE"),
     ("F", "EN"),
-    ("10:00 GMT", "EN")
+    ("10:00 GMT", "EN"),
 ]
 
 
@@ -84,7 +84,7 @@ TEST_TEXT_TO_TIMES = [
         ],
         True,
     ),
-(
+    (
         "starting between at 05:00 and 07:12 UTC",
         [
             today(17, 00, tzinfo=ZoneInfo("UTC")),
@@ -100,10 +100,27 @@ TEST_TEXT_TO_TIMES = [
         ],
         True,
     ),
+    # half intervals
+    (
+        "since around 9:40 UTC",
+        [
+            tomorrow(9, 40, tzinfo=ZoneInfo("UTC")),
+        ],
+        True,
+    ),
+    (
+        "until around 9:40 UTC",
+        [
+            tomorrow(9, 40, tzinfo=ZoneInfo("UTC")),
+        ],
+        True,
+    ),
 ]
 
 
-@pytest.mark.parametrize("test_input,expected,prefer_24h_interpretation", TEST_TEXT_TO_TIMES)
+@pytest.mark.parametrize(
+    "test_input,expected,prefer_24h_interpretation", TEST_TEXT_TO_TIMES
+)
 def test_text_to_times(test_input, expected, prefer_24h_interpretation):
     results = text_to_temporal_expressions(
         test_input, REFERENCE_DATETIME, prefer_24h_interpretation

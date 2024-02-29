@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.1.7](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.7) (2024-02-29)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.6...v0.1.7)
+
+**Merged pull requests:**
+
+- Improve language detection for short texts and fall back to English if uncertain [\#16](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/16) ([phihos](https://github.com/phihos))
+
 ## [v0.1.6](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.6) (2024-02-28)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.5...v0.1.6)

@@ -14,6 +14,7 @@ TEST_DETECT = [
     ("Let us meet at 11 am or 1 pm.", "EN"),
     ("Lass uns um 11 oder 13 Uhr treffen.", "DE"),
     ("F", "EN"),
+    ("10:00 GMT", "EN")
 ]
 
 
@@ -52,6 +53,7 @@ def tomorrow(hour: int = 0, minute: int = 0, tzinfo=REFERENCE_TZ) -> datetime.da
 
 TEST_TEXT_TO_TIMES = [
     ("12:00 UTC", [tomorrow(12, tzinfo=ZoneInfo("UTC"))], True),
+    ("10:00 GMT", [tomorrow(10, tzinfo=ZoneInfo("GMT"))], True),
     ("Lets meet at 12:00", [tomorrow(12)], True),
     ("Let us meet at 11 am or 1 pm.", [tomorrow(11), tomorrow(13)], True),
     ("Let us meet today at 8 o'clock pm.", [today(20)], True),

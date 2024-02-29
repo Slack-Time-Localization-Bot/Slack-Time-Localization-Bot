@@ -21,6 +21,7 @@ from lingua import LanguageDetectorBuilder
 detector = (
     LanguageDetectorBuilder.from_all_spoken_languages()
     .with_preloaded_language_models()
+    .with_minimum_relative_distance(0.3)
     .build()
 )
 time_zones = load_time_zones("/usr/share/zoneinfo")

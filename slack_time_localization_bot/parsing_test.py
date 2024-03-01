@@ -67,6 +67,11 @@ TEST_TEXT_TO_TIMES = [
         [today(20, 53, tzinfo=ZoneInfo("UTC"))],
         True,
     ),
+    (
+        "15:00 (UTC) / 16:00 (CET)",
+        [tomorrow(15, 00, tzinfo=ZoneInfo("UTC")), tomorrow(16, 00, tzinfo=ZoneInfo("CET"))],
+        True,
+    ),
     ("Lass uns morgen um 11 oder 13 Uhr treffen.", [tomorrow(11), tomorrow(13)], True),
     ("Lasst uns heute um 11 treffen.", [today(11)], True),
     (

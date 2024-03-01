@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.1.9](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.9) (2024-03-01)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.8...v0.1.9)
+
+**Merged pull requests:**
+
+- Omit UTC time from message if original temporal expression already was in UTC [\#20](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/20) ([phihos](https://github.com/phihos))
+- Split fake intervals like "15:00 \(UTC\) / 16:00 \(CET\)" into separate expressions [\#19](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/19) ([phihos](https://github.com/phihos))
+- Support timezones in round braces like \("15:00 \(UTC\)"\) [\#18](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/18) ([phihos](https://github.com/phihos))
+
 ## [v0.1.8](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.8) (2024-02-29)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.7...v0.1.8)

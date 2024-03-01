@@ -108,6 +108,14 @@ TEST_TEXT_TO_TIMES = [
         ],
         True,
     ),
+    (
+        "for a few minutes starting at 12:15 CET",
+        [
+            tomorrow(12, 15, tzinfo=ZoneInfo("CET")),
+            tomorrow(12, 18, tzinfo=ZoneInfo("CET")),
+        ],
+        True,
+    ),
     # half intervals
     (
         "since around 9:40 UTC",

@@ -28,7 +28,7 @@ time_zones = load_time_zones("/usr/share/zoneinfo")
 
 # initializations that should be done once on module load
 logger = logging.getLogger(__name__)
-timezone_regex = re.compile(r" (\L<tz>)", tz=zoneinfo.available_timezones())
+timezone_regex = re.compile(r"[ (](\L<tz>)", tz=zoneinfo.available_timezones())
 
 
 @dataclass

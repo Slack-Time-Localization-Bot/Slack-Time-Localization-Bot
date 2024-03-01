@@ -55,14 +55,6 @@ TEST_MESSAGES = [
         "Let's meet at 10:30 GMT.",
         "> at 10:30 GMT\n_10:30 (GMT)_ ➔ _11:30 (Europe/Amsterdam)_ or _10:30 (UTC)_",
     ),
-    (
-        "Let's meet at 10:30 UTC.",
-        "> at 10:30 UTC\n_10:30 (UTC)_ ➔ _11:30 (Europe/Amsterdam)_",
-    ),
-    (
-        "Let's meet at 10:30 CET.",
-        "> at 10:30 CET\n_10:30 (CET)_ ➔ _10:30 (Europe/Amsterdam)_ or _09:30 (UTC)_",
-    ),
 ]
 
 

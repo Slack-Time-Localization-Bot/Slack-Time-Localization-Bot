@@ -57,13 +57,16 @@ class SlackTimeLocalizationBot:
         temporal_expression: TemporalExpression,
         user_timezone: datetime.tzinfo,
     ) -> str:
-        return (
+        message = (
             f"> {temporal_expression.text}\n"
             f"_{temporal_expression.datetime.astimezone(temporal_expression.timezone).strftime(self.time_format)} "
             f"({temporal_expression.timezone})_ ➔ "
-            f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(self.time_format)} ({user_timezone})_ "
-            f"or _{temporal_expression.datetime.astimezone(ZoneInfo('UTC')).strftime(self.time_format)} (UTC)_"
+            f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(self.time_format)} ({user_timezone})_"
         )
+        if temporal_expression.timezone != ZoneInfo("UTC"):
+            utc_time = temporal_expression.datetime.astimezone(ZoneInfo('UTC')).strftime(self.time_format)
+            message += f" or _{utc_time} (UTC)_"
+        return message
 
     def process_message(self, client: WebClient, message):
         channel_id = message["channel"]

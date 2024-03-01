@@ -7,7 +7,7 @@ import pytest
 from slack_time_localization_bot.parsing import (
     detect_language,
     text_to_temporal_expressions,
-    detect_timezone,
+    detect_single_timezone,
 )
 
 TEST_DETECT = [
@@ -31,7 +31,7 @@ TEST_DETECT_TZ = [
 
 @pytest.mark.parametrize("test_input,expected", TEST_DETECT_TZ)
 def test_detect_timezone(test_input, expected):
-    assert detect_timezone(test_input) == expected
+    assert detect_single_timezone(test_input) == expected
 
 
 REFERENCE_TZ = ZoneInfo("CET")
@@ -69,7 +69,10 @@ TEST_TEXT_TO_TIMES = [
     ),
     (
         "15:00 (UTC) / 16:00 (CET)",
-        [tomorrow(15, 00, tzinfo=ZoneInfo("UTC")), tomorrow(16, 00, tzinfo=ZoneInfo("CET"))],
+        [
+            tomorrow(15, 00, tzinfo=ZoneInfo("UTC")),
+            tomorrow(16, 00, tzinfo=ZoneInfo("CET")),
+        ],
         True,
     ),
     ("Lass uns morgen um 11 oder 13 Uhr treffen.", [tomorrow(11), tomorrow(13)], True),
@@ -132,3 +135,28 @@ def test_text_to_times(test_input, expected, prefer_24h_interpretation):
     )
     all_datetimes = [result.datetime for result in results]
     assert all_datetimes == expected
+
+
+TEST_TEXT_TO_TIMES_TIMEZONES = [
+    (
+        "15:00 (UTC) / 16:00 (CET)",
+        [ZoneInfo("UTC"), ZoneInfo("CET")],
+        True,
+    ),
+    (
+        "15:00 (utc) / 16:00 (cet)",
+        [ZoneInfo("UTC"), ZoneInfo("CET")],
+        True,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "test_input,expected,prefer_24h_interpretation", TEST_TEXT_TO_TIMES_TIMEZONES
+)
+def test_text_to_times_timezones(test_input, expected, prefer_24h_interpretation):
+    results = text_to_temporal_expressions(
+        test_input, REFERENCE_DATETIME, prefer_24h_interpretation
+    )
+    all_timezones = [result.timezone for result in results]
+    assert all_timezones == expected

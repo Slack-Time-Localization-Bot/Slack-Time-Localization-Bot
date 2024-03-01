@@ -64,7 +64,9 @@ class SlackTimeLocalizationBot:
             f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(self.time_format)} ({user_timezone})_"
         )
         if temporal_expression.timezone != ZoneInfo("UTC"):
-            utc_time = temporal_expression.datetime.astimezone(ZoneInfo('UTC')).strftime(self.time_format)
+            utc_time = temporal_expression.datetime.astimezone(
+                ZoneInfo("UTC")
+            ).strftime(self.time_format)
             message += f" or _{utc_time} (UTC)_"
         return message
 

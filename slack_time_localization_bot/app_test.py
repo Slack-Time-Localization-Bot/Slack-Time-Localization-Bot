@@ -1,7 +1,7 @@
 import logging
 from unittest.mock import call
 
-import slack_bolt
+import pytest
 
 import slack_time_localization_bot
 from slack_time_localization_bot.app import SlackTimeLocalizationBot
@@ -50,7 +50,26 @@ def test_slack_bot_message_without_temporal_expressions(mocker):
     client_mock.users_info.assert_called_once_with(user=message["user"])
 
 
-def test_slack_bot_message_with_temporal_expressions(mocker):
+TEST_MESSAGES = [
+    (
+        "Let's meet at 10:30 GMT.",
+        "> at 10:30 GMT\n_10:30 (GMT)_ ➔ _11:30 (Europe/Amsterdam)_ or _10:30 (UTC)_",
+    ),
+    (
+        "Let's meet at 10:30 UTC.",
+        "> at 10:30 UTC\n_10:30 (UTC)_ ➔ _11:30 (Europe/Amsterdam)_",
+    ),
+    (
+        "Let's meet at 10:30 CET.",
+        "> at 10:30 CET\n_10:30 (CET)_ ➔ _10:30 (Europe/Amsterdam)_ or _09:30 (UTC)_",
+    ),
+]
+
+
+@pytest.mark.parametrize("input_text,expected_message", TEST_MESSAGES)
+def test_slack_bot_message_with_temporal_expressions(
+    mocker, input_text, expected_message
+):
     app_mock = mocker.MagicMock()
     client_mock = mocker.MagicMock()
     app_mock.client = client_mock
@@ -66,6 +85,7 @@ def test_slack_bot_message_with_temporal_expressions(mocker):
     mock_user_info_result = mocker.MagicMock()
     mock_user_info_result.data = mock_user
     client_mock.users_info = mocker.MagicMock(return_value=mock_user_info_result)
+    client_mock.chat_postEphemeral = mocker.MagicMock()
     mock_conversations_members_result = mocker.MagicMock()
     mock_conversations_members_result.data = mock_channel_members
     client_mock.conversations_members = mocker.MagicMock(
@@ -76,12 +96,22 @@ def test_slack_bot_message_with_temporal_expressions(mocker):
     message = {
         "channel": "some-channel",
         "user": "some-user",
-        "text": "Let's meet at 10:30 GMT.",
+        "text": input_text,
     }
     bot.process_message(client_mock, message)
 
     client_mock.users_info.assert_has_calls(
         [call(user=message["user"]), call(user="some-other-user")]
+    )
+    client_mock.chat_postEphemeral.assert_has_calls(
+        [
+            call(
+                channel="some-channel",
+                user="some-id",
+                text=expected_message,
+                thread_ts=None,
+            ),
+        ]
     )
 
 

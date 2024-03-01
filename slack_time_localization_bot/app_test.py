@@ -59,7 +59,7 @@ TEST_MESSAGES = [
         "Let's meet at 10:30 UTC.",
         "> at 10:30 UTC\n_10:30 (UTC)_ ➔ _11:30 (Europe/Amsterdam)_",
     ),
-(
+    (
         "Let's meet at 10:30 CET.",
         "> at 10:30 CET\n_10:30 (CET)_ ➔ _10:30 (Europe/Amsterdam)_ or _09:30 (UTC)_",
     ),
@@ -68,7 +68,7 @@ TEST_MESSAGES = [
 
 @pytest.mark.parametrize("input_text,expected_message", TEST_MESSAGES)
 def test_slack_bot_message_with_temporal_expressions(
-        mocker, input_text, expected_message
+    mocker, input_text, expected_message
 ):
     app_mock = mocker.MagicMock()
     client_mock = mocker.MagicMock()

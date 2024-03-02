@@ -12,6 +12,7 @@ from slack_sdk import WebClient
 from slack_time_localization_bot.parsing import (
     text_to_temporal_expressions,
     TemporalExpression,
+    TemporalIntervalExpression,
 )
 from slack_time_localization_bot.utils import sanitize_message_text
 
@@ -60,17 +61,42 @@ class SlackTimeLocalizationBot:
         temporal_expression: TemporalExpression,
         user_timezone: datetime.tzinfo,
     ) -> str:
-        message = (
-            f"> {temporal_expression.text}\n"
-            f"_{temporal_expression.datetime.astimezone(temporal_expression.timezone).strftime(self.time_format)} "
-            f"({temporal_expression.timezone})_ ➔ "
-            f"_{temporal_expression.datetime.astimezone(user_timezone).strftime(self.time_format)} ({user_timezone})_"
+        poster_time = temporal_expression.datetime.astimezone(
+            temporal_expression.timezone
+        ).strftime(self.time_format)
+        user_time = temporal_expression.datetime.astimezone(user_timezone).strftime(
+            self.time_format
         )
-        if temporal_expression.timezone != ZoneInfo("UTC"):
-            utc_time = temporal_expression.datetime.astimezone(
+        utc_time = temporal_expression.datetime.astimezone(ZoneInfo("UTC")).strftime(
+            self.time_format
+        )
+
+        message = f"> {temporal_expression.text}\n"
+        if isinstance(temporal_expression, TemporalIntervalExpression):
+            poster_interval_end_time = temporal_expression.end_datetime.astimezone(
+                temporal_expression.timezone
+            ).strftime(self.time_format)
+            user_interval_end_time = temporal_expression.end_datetime.astimezone(
+                user_timezone
+            ).strftime(self.time_format)
+            utc_interval_end_time = temporal_expression.end_datetime.astimezone(
                 ZoneInfo("UTC")
             ).strftime(self.time_format)
-            message += f" or _{utc_time} (UTC)_"
+            message += (
+                f"_{poster_time} - {poster_interval_end_time} "
+                f"({temporal_expression.timezone})_ ➔ "
+                f"_{user_time} - {user_interval_end_time} ({user_timezone})_"
+            )
+            if temporal_expression.timezone != ZoneInfo("UTC"):
+                message += f" or _{utc_time} - {utc_interval_end_time} (UTC)_"
+        else:
+            message += (
+                f"_{poster_time} "
+                f"({temporal_expression.timezone})_ ➔ "
+                f"_{user_time} ({user_timezone})_"
+            )
+            if temporal_expression.timezone != ZoneInfo("UTC"):
+                message += f" or _{utc_time} (UTC)_"
         return message
 
     def process_message(self, client: WebClient, message):

@@ -41,6 +41,11 @@ class TemporalExpression:
     timezone: datetime.tzinfo
 
 
+@dataclass
+class TemporalIntervalExpression(TemporalExpression):
+    end_datetime: datetime.datetime
+
+
 def detect_language(text: str) -> Optional[str]:
     if len(text) >= 5:
         language = detector.detect_language_of(text)
@@ -164,6 +169,8 @@ def text_to_temporal_expressions(
                     prefer_24h_interpretation,
                 )
                 continue
+            chosen_from_datetime = None
+            chosen_to_datetime = None
             if "from" in result["value"]:
                 from_candidates = [
                     isoparse(x["from"]["value"])
@@ -175,14 +182,6 @@ def text_to_temporal_expressions(
                         select_time_values_based_on_24h_preference(from_candidates)
                         if prefer_24h_interpretation
                         else from_candidates[0]
-                    )
-                    return_value.append(
-                        TemporalExpression(
-                            text=result["body"],
-                            datetime=chosen_from_datetime,
-                            timezone=detect_single_timezone(result["body"])
-                            or reference_time.tzinfo,
-                        )
                     )
             if "to" in result["value"]:
                 to_candidates = [
@@ -207,6 +206,30 @@ def text_to_temporal_expressions(
                             chosen_to_datetime = (
                                 chosen_to_datetime - datetime.timedelta(hours=1)
                             )
+
+            if chosen_from_datetime and chosen_to_datetime:
+                # if we have a full interval we use the TemporalIntervalExpression subclass
+                return_value.append(
+                    TemporalIntervalExpression(
+                        text=result["body"],
+                        datetime=chosen_from_datetime,
+                        end_datetime=chosen_to_datetime,
+                        timezone=detect_single_timezone(result["body"])
+                        or reference_time.tzinfo,
+                    )
+                )
+            else:
+                # if we have only a half-interval we just add them as ordinary points in time via TemporalExpression
+                if chosen_from_datetime:
+                    return_value.append(
+                        TemporalExpression(
+                            text=result["body"],
+                            datetime=chosen_from_datetime,
+                            timezone=detect_single_timezone(result["body"])
+                            or reference_time.tzinfo,
+                        )
+                    )
+                if chosen_to_datetime:
                     return_value.append(
                         TemporalExpression(
                             text=result["body"],

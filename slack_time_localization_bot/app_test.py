@@ -84,13 +84,13 @@ TEST_MESSAGES = [
         "> at 10:30 UTC\n_10:30 (UTC)_ ➔ _11:30 (Europe/Amsterdam)_",
     ),
     (
-        "Let's meet at 10:30 CET.",
-        "> at 10:30 CET\n_10:30 (CET)_ ➔ _10:30 (Europe/Amsterdam)_ or _09:30 (UTC)_",
+        "Let's meet at 10:30 MST.",
+        "> at 10:30 MST\n_10:30 (MST)_ ➔ _18:30 (Europe/Amsterdam)_ or _17:30 (UTC)_",
     ),
     (
-        "starting between at 5:00 and 7:00 CET",
-        "> between at 5:00 and 7:00 CET\n_05:00 - 07:00 (CET)_ ➔ _05:00 - 07:00 (Europe/Amsterdam)_ "
-        "or _04:00 - 06:00 (UTC)_",
+        "starting between at 5:00 and 7:00 MST",
+        "> between at 5:00 and 7:00 MST\n_05:00 - 07:00 (MST)_ ➔ _13:00 - 15:00 (Europe/Amsterdam)_ "
+        "or _12:00 - 14:00 (UTC)_",
     ),
 ]
 

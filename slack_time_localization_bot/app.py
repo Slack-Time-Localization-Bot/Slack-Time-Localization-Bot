@@ -130,7 +130,8 @@ class SlackTimeLocalizationBot:
                     member_timezone = ZoneInfo(member_user["tz"])
                     temporal_expressions_with_different_tz = list(
                         filter(
-                            lambda x: x.timezone != member_timezone,
+                            lambda x: x.timezone.utcoffset(x.datetime)
+                            != member_timezone.utcoffset(x.datetime),
                             temporal_expressions,
                         )
                     )

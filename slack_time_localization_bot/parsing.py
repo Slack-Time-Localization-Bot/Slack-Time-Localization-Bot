@@ -71,6 +71,7 @@ def detect_single_timezone(text: str) -> Optional[datetime.tzinfo]:
 
 def select_time_values_based_on_24h_preference(
     candidates: List[datetime.datetime],
+    timezone: Optional[datetime.datetime.tzinfo] = None,
 ):
     """Pick the datetime which is most likely correct for a text written in 24h format.
 
@@ -85,8 +86,14 @@ def select_time_values_based_on_24h_preference(
     if len(candidates) == 1:
         return candidates[0]
     preferred_candidate = candidates[0]
+    if not timezone:
+        timezone = preferred_candidate.tzinfo
     for candidate in candidates[1:]:
-        if preferred_candidate.hour - candidate.hour == 12:
+        if (
+            preferred_candidate.astimezone(timezone).hour
+            - candidate.astimezone(timezone).hour
+            == 12
+        ):
             # take other candidate if it is 12h in the future
             # for example 5:00 wins against 17:00
             return candidate
@@ -118,8 +125,11 @@ def text_to_temporal_expressions(
                 if x["grain"] != "day"
             ]
             if candidates:
+                detected_timezone = detect_single_timezone(result["body"])
                 chosen_datetime = (
-                    select_time_values_based_on_24h_preference(candidates)
+                    select_time_values_based_on_24h_preference(
+                        candidates, detected_timezone
+                    )
                     if prefer_24h_interpretation
                     else candidates[0]
                 )
@@ -127,8 +137,7 @@ def text_to_temporal_expressions(
                     TemporalExpression(
                         text=result["body"],
                         datetime=chosen_datetime,
-                        timezone=detect_single_timezone(result["body"])
-                        or reference_time.tzinfo,
+                        timezone=detected_timezone or reference_time.tzinfo,
                     )
                 )
         elif result["value"]["type"] == "interval":
@@ -179,7 +188,9 @@ def text_to_temporal_expressions(
                 ]
                 if from_candidates:
                     chosen_from_datetime = (
-                        select_time_values_based_on_24h_preference(from_candidates)
+                        select_time_values_based_on_24h_preference(
+                            from_candidates, interval_timezone
+                        )
                         if prefer_24h_interpretation
                         else from_candidates[0]
                     )
@@ -191,7 +202,9 @@ def text_to_temporal_expressions(
                 ]
                 if to_candidates:
                     chosen_to_datetime = (
-                        select_time_values_based_on_24h_preference(to_candidates)
+                        select_time_values_based_on_24h_preference(
+                            to_candidates, interval_timezone
+                        )
                         if prefer_24h_interpretation
                         else to_candidates[0]
                     )

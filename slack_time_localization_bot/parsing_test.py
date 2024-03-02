@@ -8,6 +8,7 @@ from slack_time_localization_bot.parsing import (
     detect_language,
     text_to_temporal_expressions,
     detect_single_timezone,
+    TemporalIntervalExpression,
 )
 
 TEST_DETECT = [
@@ -142,6 +143,11 @@ def test_text_to_times(test_input, expected, prefer_24h_interpretation):
         test_input, REFERENCE_DATETIME, prefer_24h_interpretation
     )
     all_datetimes = [result.datetime for result in results]
+    all_datetimes += [
+        result.end_datetime
+        for result in results
+        if isinstance(result, TemporalIntervalExpression)
+    ]
     assert all_datetimes == expected
 
 

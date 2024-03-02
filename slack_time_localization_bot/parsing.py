@@ -71,7 +71,7 @@ def detect_single_timezone(text: str) -> Optional[datetime.tzinfo]:
 
 def select_time_values_based_on_24h_preference(
     candidates: List[datetime.datetime],
-    timezone: Optional[datetime.datetime.tzinfo] = None,
+    timezone: Optional[datetime.tzinfo] = None,
 ):
     """Pick the datetime which is most likely correct for a text written in 24h format.
 
@@ -227,7 +227,7 @@ def text_to_temporal_expressions(
                         text=result["body"],
                         datetime=chosen_from_datetime,
                         end_datetime=chosen_to_datetime,
-                        timezone=detect_single_timezone(result["body"])
+                        timezone=interval_timezone
                         or reference_time.tzinfo,
                     )
                 )
@@ -238,7 +238,7 @@ def text_to_temporal_expressions(
                         TemporalExpression(
                             text=result["body"],
                             datetime=chosen_from_datetime,
-                            timezone=detect_single_timezone(result["body"])
+                            timezone=interval_timezone
                             or reference_time.tzinfo,
                         )
                     )
@@ -247,7 +247,7 @@ def text_to_temporal_expressions(
                         TemporalExpression(
                             text=result["body"],
                             datetime=chosen_to_datetime,
-                            timezone=detect_single_timezone(result["body"])
+                            timezone=interval_timezone
                             or reference_time.tzinfo,
                         )
                     )

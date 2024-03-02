@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.1.10](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.10) (2024-03-02)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.9...v0.1.10)
+
+**Merged pull requests:**
+
+- Move tests to own directory to prevent distortion of coverage percentage [\#25](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/25) ([phihos](https://github.com/phihos))
+- Do not show timezone localization if timezones have the same UTC offset \(like Europe/Amsterdam and CE\(S\)T\) [\#24](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/24) ([phihos](https://github.com/phihos))
+- Better formatting for time intervals like "starting between at 5:00 and 7:00" [\#23](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/23) ([phihos](https://github.com/phihos))
+- Support message edits by posting a new ephemeral message upon edit [\#22](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/22) ([phihos](https://github.com/phihos))
+- Minor improvement in message handling testing [\#21](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/21) ([phihos](https://github.com/phihos))
+
 ## [v0.1.9](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.9) (2024-03-01)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.8...v0.1.9)

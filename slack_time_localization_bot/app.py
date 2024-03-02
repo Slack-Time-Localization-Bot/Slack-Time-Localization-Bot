@@ -29,9 +29,12 @@ class SlackTimeLocalizationBot:
         self.app = app
         self.slack_app_token = slack_app_token
         self.logger = logging.getLogger(__name__)
-        self.app.message()(  # register process_message as handler for every incoming message
+        self.app.event(
+            "message"
+        )(  # register process_message as handler for every incoming message
             self.process_message
         )
+        self.app.action("dismiss")(self.process_dismiss)
         self.user_cache = TTLCache(maxsize=user_cache_size, ttl=user_cache_ttl)
         self.time_format = time_format
         self.prefer_24h_interpretation = prefer_24h_interpretation
@@ -71,7 +74,12 @@ class SlackTimeLocalizationBot:
         return message
 
     def process_message(self, client: WebClient, message):
+        message_subtype = message.get("subtype", None)
         channel_id = message["channel"]
+        if message_subtype == "message_changed":
+            # if this is a message edit the rest of the information has moved to the "message" subkey
+            message = message["message"]
+        message_ts = message["ts"]
         thread_id = message.get("thread_ts", None)
         poster_id = message["user"]
         text = sanitize_message_text(message["text"])
@@ -101,7 +109,15 @@ class SlackTimeLocalizationBot:
                         )
                     )
                     if temporal_expressions_with_different_tz:
-                        ephemeral_message_lines = list(
+                        ephemeral_message_lines = []
+                        if message_subtype == "message_changed":
+                            link_to_message = self.app.client.chat_getPermalink(
+                                channel=channel_id, message_ts=message_ts
+                            )["permalink"]
+                            ephemeral_message_lines += [
+                                f"_<{link_to_message}|Message> edited:_"
+                            ]
+                        ephemeral_message_lines += list(
                             map(
                                 lambda x: self.time_comparison_to_text(
                                     x, member_timezone
@@ -113,12 +129,36 @@ class SlackTimeLocalizationBot:
                         self.logger.debug(
                             f'Sending ephemeral message to {member_user["name"]}: {ephemeral_message}'
                         )
+                        blocks = [
+                            {
+                                "type": "section",
+                                "text": {
+                                    "text": ephemeral_message,
+                                    "type": "mrkdwn",
+                                },
+                                "accessory": {
+                                    "type": "button",
+                                    "action_id": "dismiss",
+                                    "accessibility_label": "Dismiss this message",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "X",
+                                    },
+                                },
+                            }
+                        ]
+                        # use blocks and add a remove button
                         client.chat_postEphemeral(
                             channel=channel_id,
                             user=member_id,
-                            text=ephemeral_message,
+                            blocks=blocks,
                             thread_ts=thread_id,
                         )
+
+    @staticmethod
+    def process_dismiss(ack, respond):
+        ack()
+        respond(delete_original=True)
 
 
 def run(

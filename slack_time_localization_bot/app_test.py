@@ -7,47 +7,71 @@ import slack_time_localization_bot
 from slack_time_localization_bot.app import SlackTimeLocalizationBot
 
 
-def test_slack_bot_start(mocker):
+def create_test_bot(
+    mocker,
+    app_token="some-token",
+    mock_user=None,
+    mock_channel_members=None,
+    mock_permalink=None,
+):
+    """Create a SlackTimeLocalizationBot instance with almost all dependencies mocked."""
     app_mock = mocker.MagicMock()
     app_mock.client = mocker.MagicMock()
-    app_mock.message = mocker.MagicMock()
+    app_mock.event = mocker.MagicMock()
+    app_mock.action = mocker.MagicMock()
+    client_mock = mocker.MagicMock()
+    app_mock.client = client_mock
+    mock_user_info_result = mocker.MagicMock()
+    mock_user_info_result.data = mock_user
+    client_mock.users_info = mocker.MagicMock(return_value=mock_user_info_result)
+    client_mock.chat_postEphemeral = mocker.MagicMock()
+    mock_conversations_members_result = mocker.MagicMock()
+    mock_conversations_members_result.data = mock_channel_members
+    client_mock.conversations_members = mocker.MagicMock(
+        return_value=mock_conversations_members_result
+    )
+    client_mock.chat_getPermalink = mocker.MagicMock(
+        return_value={"permalink": mock_permalink}
+    )
+
+    bot = SlackTimeLocalizationBot(app_mock, app_token)
+    return bot
+
+
+def test_slack_bot_start(mocker):
     socket_mode_handler_instance_mock = mocker.MagicMock()
     socket_mode_handler_instance_mock.start = mocker.MagicMock()
     socket_mode_handler_class_mock = mocker.MagicMock(
         return_value=socket_mode_handler_instance_mock
     )
 
-    bot = SlackTimeLocalizationBot(app_mock, "some-token")
+    bot = create_test_bot(mocker)
     bot.start(socket_mode_handler_class_mock)
 
-    assert app_mock.message.call_count == 1
+    assert bot.app.event.call_count == 1
+    assert bot.app.action.call_count == 1
     assert socket_mode_handler_class_mock.call_count == 1
     assert socket_mode_handler_instance_mock.start.call_count == 1
 
 
 def test_slack_bot_message_without_temporal_expressions(mocker):
-    app_mock = mocker.MagicMock()
-    client_mock = mocker.MagicMock()
-    app_mock.client = client_mock
     mock_user = {
         "user": {
             "tz": "Europe/Amsterdam",
             "is_bot": False,
         }
     }
-    mock_user_info_result = mocker.MagicMock()
-    mock_user_info_result.data = mock_user
-    client_mock.users_info = mocker.MagicMock(return_value=mock_user_info_result)
-    bot = SlackTimeLocalizationBot(app_mock, "some-token")
+    bot = create_test_bot(mocker, mock_user=mock_user)
 
     message = {
         "channel": "some-channel",
         "user": "some-user",
         "text": "some-text-without-temporal_expressions",
+        "ts": "some-ts",
     }
-    bot.process_message(client_mock, message)
+    bot.process_message(bot.app.client, message)
 
-    client_mock.users_info.assert_called_once_with(user=message["user"])
+    bot.app.client.users_info.assert_called_once_with(user=message["user"])
 
 
 TEST_MESSAGES = [
@@ -70,9 +94,6 @@ TEST_MESSAGES = [
 def test_slack_bot_message_with_temporal_expressions(
     mocker, input_text, expected_message
 ):
-    app_mock = mocker.MagicMock()
-    client_mock = mocker.MagicMock()
-    app_mock.client = client_mock
     mock_user = {
         "user": {
             "id": "some-id",
@@ -82,37 +103,139 @@ def test_slack_bot_message_with_temporal_expressions(
         }
     }
     mock_channel_members = {"members": ["some-user", "some-other-user"]}
-    mock_user_info_result = mocker.MagicMock()
-    mock_user_info_result.data = mock_user
-    client_mock.users_info = mocker.MagicMock(return_value=mock_user_info_result)
-    client_mock.chat_postEphemeral = mocker.MagicMock()
-    mock_conversations_members_result = mocker.MagicMock()
-    mock_conversations_members_result.data = mock_channel_members
-    client_mock.conversations_members = mocker.MagicMock(
-        return_value=mock_conversations_members_result
+
+    bot = create_test_bot(
+        mocker, mock_user=mock_user, mock_channel_members=mock_channel_members
     )
-    bot = SlackTimeLocalizationBot(app_mock, "some-token")
 
     message = {
         "channel": "some-channel",
         "user": "some-user",
         "text": input_text,
+        "ts": "some-ts",
     }
-    bot.process_message(client_mock, message)
+    bot.process_message(bot.app.client, message)
 
-    client_mock.users_info.assert_has_calls(
+    bot.app.client.users_info.assert_has_calls(
         [call(user=message["user"]), call(user="some-other-user")]
     )
-    client_mock.chat_postEphemeral.assert_has_calls(
+    expected_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "text": expected_message,
+                "type": "mrkdwn",
+            },
+            "accessory": {
+                "type": "button",
+                "action_id": "dismiss",
+                "accessibility_label": "Dismiss this message",
+                "text": {
+                    "type": "plain_text",
+                    "text": "X",
+                },
+            },
+        }
+    ]
+    bot.app.client.chat_postEphemeral.assert_has_calls(
         [
             call(
                 channel="some-channel",
                 user="some-id",
-                text=expected_message,
+                blocks=expected_blocks,
                 thread_ts=None,
             ),
         ]
     )
+
+
+TEST_EDIT_MESSAGES = [
+    (
+        "Let's meet at 10:30 GMT.",
+        "> at 10:30 GMT\n_10:30 (GMT)_ ➔ _11:30 (Europe/Amsterdam)_ or _10:30 (UTC)_",
+    ),
+]
+
+
+@pytest.mark.parametrize("input_text,expected_message", TEST_EDIT_MESSAGES)
+def test_slack_bot_message_edit_with_temporal_expressions(
+    mocker, input_text, expected_message
+):
+    mock_user = {
+        "user": {
+            "id": "some-id",
+            "name": "some-user",
+            "tz": "Europe/Amsterdam",
+            "is_bot": False,
+        }
+    }
+    mock_channel_members = {"members": ["some-user", "some-other-user"]}
+    expected_message = f"_<https://mockpermalink|Message> edited:_\n" + expected_message
+
+    bot = create_test_bot(
+        mocker,
+        mock_user=mock_user,
+        mock_channel_members=mock_channel_members,
+        mock_permalink="https://mockpermalink",
+    )
+
+    message = {
+        "channel": "some-channel",
+        "subtype": "message_changed",
+        "ts": "some-other-ts",
+        "message": {
+            "user": "some-user",
+            "text": input_text,
+            "ts": "some-ts",
+        },
+    }
+    bot.process_message(bot.app.client, message)
+
+    bot.app.client.users_info.assert_has_calls(
+        [call(user=message["message"]["user"]), call(user="some-other-user")]
+    )
+    expected_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "text": expected_message,
+                "type": "mrkdwn",
+            },
+            "accessory": {
+                "type": "button",
+                "action_id": "dismiss",
+                "accessibility_label": "Dismiss this message",
+                "text": {
+                    "type": "plain_text",
+                    "text": "X",
+                },
+            },
+        }
+    ]
+    bot.app.client.chat_getPermalink.assert_has_calls(
+        [call(channel="some-channel", message_ts="some-ts")]
+    )
+    bot.app.client.chat_postEphemeral.assert_has_calls(
+        [
+            call(
+                channel="some-channel",
+                user="some-id",
+                blocks=expected_blocks,
+                thread_ts=None,
+            ),
+        ]
+    )
+
+
+def test_slack_bot_dismiss(mocker):
+    mock_ack = mocker.MagicMock()
+    mock_respond = mocker.MagicMock()
+    bot = create_test_bot(mocker)
+
+    bot.process_dismiss(mock_ack, mock_respond)
+
+    mock_ack.assert_called_once()
+    mock_respond.assert_called_once_with(delete_original=True)
 
 
 def test_run(monkeypatch, mocker):

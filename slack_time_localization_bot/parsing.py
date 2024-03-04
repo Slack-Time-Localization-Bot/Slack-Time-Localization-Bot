@@ -147,7 +147,7 @@ def text_to_temporal_expressions(
                 # for example 15:00 (UTC) / 16:00 (CET)
                 # we split this into two expressions and rerun this logic for each individually
                 parts = re.split(
-                    f"({str(interval_timezones[0])}[^ ])",
+                    f"({str(interval_timezones[0])}[^ ]*)",
                     text,
                     maxsplit=1,
                     flags=re.IGNORECASE,

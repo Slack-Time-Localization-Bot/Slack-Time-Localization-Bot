@@ -83,6 +83,10 @@ TEST_TEXT_TO_TIMES = [
         [tomorrow(11, tzinfo=ZoneInfo("EST"))],
         True,
     ),
+    ("at 11:15 UTC / 12:15 CET", [
+        tomorrow(11, 15, tzinfo=ZoneInfo("UTC")),
+        tomorrow(12, 15, tzinfo=ZoneInfo("CET")),
+    ], True),
     # intervals
     ("from the one", [], True),
     (

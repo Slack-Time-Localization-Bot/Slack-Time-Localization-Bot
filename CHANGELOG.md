@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.1.11](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.11) (2024-03-04)
+
+[Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.10...v0.1.11)
+
+**Merged pull requests:**
+
+- Fix error when handling text like "at 11:15 UTC / 12:15 CET" [\#26](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/pull/26) ([phihos](https://github.com/phihos))
+
 ## [v0.1.10](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/tree/v0.1.10) (2024-03-02)
 
 [Full Changelog](https://github.com/Slack-Time-Localization-Bot/Slack-Time-Localization-Bot/compare/v0.1.9...v0.1.10)

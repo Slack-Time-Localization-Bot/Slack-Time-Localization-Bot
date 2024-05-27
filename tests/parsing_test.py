@@ -87,6 +87,8 @@ TEST_TEXT_TO_TIMES = [
         tomorrow(11, 15, tzinfo=ZoneInfo("UTC")),
         tomorrow(12, 15, tzinfo=ZoneInfo("CET")),
     ], True),
+    # invalid times
+    ("let's upgrade from Ubuntu 16.04", [], True),
     # intervals
     ("from the one", [], True),
     (

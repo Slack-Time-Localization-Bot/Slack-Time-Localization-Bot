@@ -1,18 +1,24 @@
+import datetime
 import logging
 from unittest.mock import call
+from zoneinfo import ZoneInfo
 
 import pytest
+from freezegun import freeze_time
 
 import slack_time_localization_bot
 from slack_time_localization_bot.app import SlackTimeLocalizationBot
 
+REFERENCE_TZ = ZoneInfo("CET")
+REFERENCE_DATETIME = datetime.datetime(2023, 2, 17, 18, 17, tzinfo=REFERENCE_TZ)
+
 
 def create_test_bot(
-    mocker,
-    app_token="some-token",
-    mock_user=None,
-    mock_channel_members=None,
-    mock_permalink=None,
+        mocker,
+        app_token="some-token",
+        mock_user=None,
+        mock_channel_members=None,
+        mock_permalink=None,
 ):
     """Create a SlackTimeLocalizationBot instance with almost all dependencies mocked."""
     app_mock = mocker.MagicMock()
@@ -95,9 +101,10 @@ TEST_MESSAGES = [
 ]
 
 
+@freeze_time(REFERENCE_DATETIME)
 @pytest.mark.parametrize("input_text,expected_message", TEST_MESSAGES)
 def test_slack_bot_message_with_temporal_expressions(
-    mocker, input_text, expected_message
+        mocker, input_text, expected_message
 ):
     mock_user = {
         "user": {
@@ -162,9 +169,10 @@ TEST_EDIT_MESSAGES = [
 ]
 
 
+@freeze_time(REFERENCE_DATETIME)
 @pytest.mark.parametrize("input_text,expected_message", TEST_EDIT_MESSAGES)
 def test_slack_bot_message_edit_with_temporal_expressions(
-    mocker, input_text, expected_message
+        mocker, input_text, expected_message
 ):
     mock_user = {
         "user": {

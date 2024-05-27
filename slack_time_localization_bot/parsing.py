@@ -32,6 +32,7 @@ timezone_regex = re.compile(r"[ (]((?i)\L<tz>)", tz=zoneinfo.available_timezones
 timezone_case_insensitive_search_map = {
     timezone.lower(): timezone for timezone in zoneinfo.available_timezones()
 }
+invalid_text_regexes = [re.compile("^\d{1,2}[.]\d{2}$")]
 
 
 @dataclass
@@ -67,6 +68,13 @@ def detect_single_timezone(text: str) -> Optional[datetime.tzinfo]:
     if timezones:
         return timezones[0]
     return None
+
+
+def filter_invalid_results(result: TemporalExpression):
+    # remove results that contain dotted number like "16.04"
+    if any(regex.match(result.text) for regex in invalid_text_regexes):
+        return False
+    return True
 
 
 def select_time_values_based_on_24h_preference(
@@ -227,8 +235,7 @@ def text_to_temporal_expressions(
                         text=result["body"],
                         datetime=chosen_from_datetime,
                         end_datetime=chosen_to_datetime,
-                        timezone=interval_timezone
-                        or reference_time.tzinfo,
+                        timezone=interval_timezone or reference_time.tzinfo,
                     )
                 )
             else:
@@ -238,8 +245,7 @@ def text_to_temporal_expressions(
                         TemporalExpression(
                             text=result["body"],
                             datetime=chosen_from_datetime,
-                            timezone=interval_timezone
-                            or reference_time.tzinfo,
+                            timezone=interval_timezone or reference_time.tzinfo,
                         )
                     )
                 if chosen_to_datetime:
@@ -247,8 +253,8 @@ def text_to_temporal_expressions(
                         TemporalExpression(
                             text=result["body"],
                             datetime=chosen_to_datetime,
-                            timezone=interval_timezone
-                            or reference_time.tzinfo,
+                            timezone=interval_timezone or reference_time.tzinfo,
                         )
                     )
+    return_value = list(filter(filter_invalid_results, return_value))
     return return_value

@@ -32,7 +32,7 @@ timezone_regex = re.compile(r"[ (]((?i)\L<tz>)", tz=zoneinfo.available_timezones
 timezone_case_insensitive_search_map = {
     timezone.lower(): timezone for timezone in zoneinfo.available_timezones()
 }
-invalid_text_regexes = [re.compile("^\d{1,2}[.]\d{2}$")]
+invalid_text_regexes = [re.compile(r"^\d{1,2}[.]\d{2}$")]
 
 
 @dataclass

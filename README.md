@@ -112,5 +112,5 @@ Install poetry and run
 
 ```shell
 poetry install
-poetry run pytest ./slack_time_localization_bot
+poetry run pytest ./tests
 ```

@@ -17,7 +17,6 @@ slack-bolt = ">=1.18.1"
 cachetools = ">=5.3.2"
 pyduckling-native-phihos = ">=0.2.0"
 lingua-language-detector = ">=2.0.2"
-pendulum = ">=3.0.0"
 regex = ">=2024.5.15"
 typer = {extras = ["all"], version = ">=0.9"}
 freezegun = ">=1.5.1"

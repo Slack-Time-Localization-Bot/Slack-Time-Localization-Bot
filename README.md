@@ -90,7 +90,7 @@ Create and get the bot token (under "OAuth & Permissions") and app token (under 
 pip install slack-time-localization-bot
 ```
 
-> ℹ️ Currently only Linx x86_64 is supported
+> ℹ️ Currently only Linux x86_64 is supported
 
 Finally you can run it with
 
